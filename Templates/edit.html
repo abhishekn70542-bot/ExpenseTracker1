@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Expense</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f4f9;
+            margin: 0;
+            padding: 25px;
+            color: #222;
+        }
+
+        main {
+            max-width: 700px;
+            margin: 40px auto;
+        }
+
+        h1 {
+            color: #23395d;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        label {
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+            background: white;
+        }
+
+        button {
+            padding: 12px;
+            background: #2458a6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #194681;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #2458a6;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .message {
+            padding: 12px;
+            margin-bottom: 15px;
+            background: #e3f5e7;
+            border-radius: 6px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
+            .card {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<main>
+    <h1>Edit Expense</h1>
+    <p>Update the details of your expense below.</p>
+
+    {% for message in get_flashed_messages() %}
+        <div class="message">{{ message }}</div>
+    {% endfor %}
+
+    <div class="card">
+        <form method="POST">
+
+            <label>
+                Date
+                <input type="date"
+                       name="expense_date"
+                       value="{{ expense.expense_date }}"
+                       required>
+            </label>
+
+            <label>
+                Amount (₹)
+                <input type="number"
+                       name="amount"
+                       min="0.01"
+                       step="0.01"
+                       value="{{ expense.amount }}"
+                       required>
+            </label>
+
+            <label>
+                Category
+                <select name="category_id" required>
+                    {% for category in categories %}
+                        <option value="{{ category.category_id }}"
+                            {% if category.category_id == expense.category_id %}selected{% endif %}>
+                            {{ category.category_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label>
+                Description
+                <input type="text"
+                       name="description"
+                       maxlength="255"
+                       value="{{ expense.description or '' }}"
+                       placeholder="Reason for expense">
+            </label>
+
+            <label>
+                Payment Method
+                <select name="payment_method">
+                    {% for method in ['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'] %}
+                        <option value="{{ method }}"
+                            {% if method == expense.payment_method %}selected{% endif %}>
+                            {{ method }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <button type="submit">Save Changes</button>
+        </form>
+
+        <a class="back-link" href="{{ url_for('index') }}">
+            ← Back to Expenses
+        </a>
+    </div>
+</main>
+</body>
+</html>

@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Analytics</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f4f9;
+            margin: 0;
+            padding: 25px;
+            color: #222;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        h1, h2 {
+            color: #23395d;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin: 20px 0;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .card h3 {
+            color: #666;
+            font-size: 15px;
+            margin-top: 0;
+        }
+
+        .value {
+            color: #16834a;
+            font-size: 25px;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #edf1f8;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin: 10px 0 20px;
+            color: #2458a6;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .empty {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<main>
+    <h1>Expense Analytics Dashboard</h1>
+    <p>Understand your spending patterns using data analytics.</p>
+
+    <a class="back-link" href="{{ url_for('index') }}">
+        ← Back to Expense Tracker
+    </a>
+
+    {% if not has_data %}
+        <div class="empty">
+            <h2>No expense data available</h2>
+            <p>Add some expenses first to see your analytics.</p>
+        </div>
+
+    {% else %}
+
+        <div class="cards">
+            <div class="card">
+                <h3>Total Spending</h3>
+                <div class="value">
+                    ₹{{ "%.2f"|format(total_spending) }}
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Average Expense</h3>
+                <div class="value">
+                    ₹{{ "%.2f"|format(average_expense) }}
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Number of Expenses</h3>
+                <div class="value">{{ expense_count }}</div>
+            </div>
+
+            <div class="card">
+                <h3>Highest-Spending Category</h3>
+                <div class="value">{{ highest_category }}</div>
+                <p>₹{{ "%.2f"|format(highest_amount) }}</p>
+            </div>
+        </div>
+
+        <section class="card">
+            <h2>Category-wise Spending</h2>
+            <img
+                src="data:image/png;base64,{{ category_chart }}"
+                alt="Pie chart showing category-wise expenses"
+                style="width: 100%; max-width: 650px; display: block; margin: auto;">
+        </section>
+
+        <section class="card">
+            <h2>Monthly Spending Chart</h2>
+            <img
+                src="data:image/png;base64,{{ monthly_chart }}"
+                alt="Bar chart showing monthly expenses"
+                style="width: 100%; max-width: 750px; display: block; margin: auto;">
+        </section>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Total Spent</th>
+                            <th>Share of Spending</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in category_data %}
+                        <tr>
+                            <td>{{ item.category }}</td>
+                            <td>₹{{ "%.2f"|format(item.amount) }}</td>
+                            <td>{{ "%.1f"|format(item.percentage) }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Monthly Spending</h2>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Total Spent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in monthly_data %}
+                        <tr>
+                            <td>{{ item.month }}</td>
+                            <td>₹{{ "%.2f"|format(item.amount) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    {% endif %}
+</main>
+</body>
+</html>

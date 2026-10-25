@@ -1,0 +1,318 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Expense Tracker</title>
+    <p>
+    <a href="{{ url_for('analytics') }}"
+       style="color: #2458a6; font-weight: bold;">
+        View Analytics Dashboard →
+    </a>
+    </p>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f4f9;
+            margin: 0;
+            padding: 25px;
+            color: #222;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #23395d;
+        }
+
+        section {
+            background: white;
+            padding: 22px;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .summary {
+            font-size: 28px;
+            color: #16834a;
+            font-weight: bold;
+        }
+
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        input, select, button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #2458a6;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        .delete-button {
+            background: #c62828;
+        }
+
+        .edit-link {
+            display: inline-block;
+            margin-right: 10px;
+            color: #2458a6;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 750px;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #edf1f8;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        .message {
+            padding: 12px;
+            background: #e3f5e7;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            section {
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<main>
+    <h1>Personal Expense Tracker</h1>
+    <p>Manage your daily expenses and understand your spending.</p>
+
+    <!-- Success and error messages -->
+    {% for message in get_flashed_messages() %}
+        <div class="message">{{ message }}</div>
+    {% endfor %}
+
+    <!-- Expense summary -->
+    <section>
+        <h2>Total Expenses</h2>
+
+        <div class="summary">
+            ₹{{ "%.2f"|format(total) }}
+        </div>
+
+        <p>Number of expenses: {{ expenses|length }}</p>
+    </section>
+
+    <!-- Add expense form -->
+    <section>
+        <h2>Add New Expense</h2>
+
+        <form action="{{ url_for('add_expense') }}" method="POST">
+
+            <label>
+                Date:
+                <input type="date" name="expense_date" required>
+            </label>
+
+            <label>
+                Amount:
+                <input
+                    type="number"
+                    name="amount"
+                    placeholder="Amount in ₹"
+                    min="0.01"
+                    step="0.01"
+                    required>
+            </label>
+
+            <label>
+                Category:
+                <select name="category_id" required>
+                    <option value="">Select category</option>
+
+                    {% for category in categories %}
+                        <option value="{{ category.category_id }}">
+                            {{ category.category_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <label>
+                Description:
+                <input
+                    type="text"
+                    name="description"
+                    placeholder="Reason for expense"
+                    maxlength="255">
+            </label>
+
+            <label>
+                Payment:
+                <select name="payment_method">
+                    <option value="Cash">Cash</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Card">Card</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                    <option value="Other">Other</option>
+                </select>
+            </label>
+
+            <button type="submit">Add Expense</button>
+        </form>
+    </section>
+
+    <!-- Expense records -->
+    <section>
+        <h2>All Expenses</h2>
+
+<section>
+    <h2>Filter Expenses</h2>
+
+    <form action="{{ url_for('index') }}" method="GET">
+
+        <label>
+            Start Date:
+            <input type="date"
+                   name="start_date"
+                   value="{{ start_date }}">
+        </label>
+
+        <label>
+            End Date:
+            <input type="date"
+                   name="end_date"
+                   value="{{ end_date }}">
+        </label>
+
+        <label>
+            Category:
+            <select name="category_id">
+                <option value="">All Categories</option>
+
+                {% for category in categories %}
+                    <option value="{{ category.category_id }}"
+                        {% if selected_category|string == category.category_id|string %}selected{% endif %}>
+                        {{ category.category_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <button type="submit">Apply Filters</button>
+
+        <a href="{{ url_for('index') }}"
+           style="padding: 10px; color: #2458a6;">
+            Clear Filters
+        </a>
+
+    </form>
+</section>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                        <th>Payment Method</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for expense in expenses %}
+                        <tr>
+                            <td>{{ expense.expense_date }}</td>
+
+                            <td>{{ expense.category_name }}</td>
+
+                            <td>
+                                ₹{{ "%.2f"|format(expense.amount) }}
+                            </td>
+
+                            <td>
+                                {{ expense.description or "-" }}
+                            </td>
+
+                            <td>
+                                {{ expense.payment_method or "Cash" }}
+                            </td>
+
+                            <td>
+                                <a
+                                    class="edit-link"
+                                    href="{{ url_for('edit_expense', expense_id=expense.expense_id) }}">
+                                    Edit
+                                </a>
+
+                                <form
+                                    action="{{ url_for('delete_expense', expense_id=expense.expense_id) }}"
+                                    method="POST"
+                                    style="display:inline;"
+                                    onsubmit="return confirm('Are you sure you want to delete this expense?');">
+
+                                    <button
+                                        type="submit"
+                                        class="delete-button">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+
+                    {% else %}
+                        <tr>
+                            <td colspan="6">
+                                No expenses yet. Add your first expense above.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+</body>
+</html>
